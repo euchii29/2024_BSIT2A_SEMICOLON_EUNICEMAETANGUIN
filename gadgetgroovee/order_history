@@ -1,0 +1,196 @@
+<?php
+include 'config.php';
+
+if (!isset($_SESSION["logged_in"]) || $_SESSION["user_type"] !== 'usertype') {
+    header("location: login.php");
+    exit;
+
+
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+    echo "User not logged in.";
+    exit;
+}
+
+// Fetch user ID
+$user_id = $_SESSION['user_id'];
+
+// Fetch orders for the user with additional details
+$sql = "SELECT order_id, user_id, product_id, status, order_date, quantity, price, total_amount
+        FROM orders
+        WHERE user_id = ?
+        ORDER BY order_id DESC";
+
+$stmt = $conn->prepare($sql);
+
+if ($stmt === false) {
+    die("SQL error: " . $conn->error);
+}
+
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result === false) {
+    die("Query error: " . $stmt->error);
+}
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GADGET GROOVE</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+    <div id="sidebar" class="sidebar">
+        <div class="logo">
+            <img src="img/Facebook_cover_-_1-removebg-preview.png" alt="GadgetGroove Logo" width="150px">
+        </div>
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><i class="fa-solid fa-bars"></i></a>
+        <a href="profile.php">Profile</a>
+        <a href="#">About Us</a>
+        <a href="#">Services</a>
+        <a href="#">Contact</a>
+        <a href="logout.php">Log Out</a>
+    </div>
+
+    <section id="header1">
+        <ul id="navbar">
+            <li><a href="javascript:void(0)" class="openbtn" onclick="openNav()"><i class="fa-solid fa-bars"></i></a></li>
+        </ul> 
+        <img src="img/Facebook_cover_-_1-removebg-preview.png" class="logo" alt="">
+        
+        <form action="search.php" method="get" class="nav-search">
+            <select name="category" class="select-search" id="category-select">
+                <option>All</option>
+                <option>All Categories</option>
+            </select>
+            <input type="text" placeholder="Search" class="search-input" id="search-bar" name="query">
+            <button type="submit" class="search-icon" id="search-icon">
+                <span class="fa-solid fa-magnifying-glass"></span></button>
+        </form>
+
+        <div>
+            <ul id="navbar">
+                <li><a href="home2.php"><i class="fa-solid fa-house"></i></a></li>
+                <li><a href="shop.php"><i class="fa-solid fa-shop"></i></a></li>
+                <li><a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a></li>
+                <li><a href="order_tracking.php"><i class="fa-solid fa-truck-fast"></i></a></li>
+                <li><a class="active" href="order_history.php"><i class="fa-solid fa-clock-rotate-left"></i></a></li>
+            </ul> 
+        </div>
+    </section>
+
+    <div class="container mt-5">
+        <h1>Order History</h1>
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Order ID</th>
+                    <th>Product Name</th>
+                    <th>Product Image</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total Amount</th>
+                    <th>Full Name</th>
+                    <th>Contact No</th>
+                    <th>Shipping Address</th>
+                    <th>Order Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                if ($result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+                        echo "<tr>";
+                        echo "<td>" . htmlspecialchars($row['order_id']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['product_name']) . "</td>";
+                        echo "<td><img src='path_to_images/" . htmlspecialchars($row['product_id']) . ".jpg' alt='" . htmlspecialchars($row['product_name']) . "' width='50'></td>"; // Assuming images are stored with product_id as the filename
+                        echo "<td>Php " . htmlspecialchars($row['price']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['quantity']) . "</td>";
+                        echo "<td>Php " . htmlspecialchars($row['total_amount']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['full_name']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['contact_no']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['shipping_address']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['status']) . "</td>";
+                        echo "<td>
+                                <form method='post' style='display:inline-block;'>
+                                    <input type='hidden' name='order_id' value='" . htmlspecialchars($row['order_id']) . "'>
+                                    <button type='submit' name='received' class='btn btn-success'>Mark as Received</button>
+                                </form>
+                                <form method='post' style='display:inline-block;'>
+                                    <input type='hidden' name='order_id' value='" . htmlspecialchars($row['order_id']) . "'>
+                                    <button type='submit' name='cancel' class='btn btn-danger'>Cancel</button>
+                                </form>
+                                <form method='post' style='display:inline-block;'>
+                                    <input type='hidden' name='order_id' value='" . htmlspecialchars($row['order_id']) . "'>
+                                    <button type='submit' name='delete' class='btn btn-warning'>Delete</button>
+                                </form>
+                              </td>";
+                        echo "</tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='11'>No orders found</td></tr>";
+                }
+                ?>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <?php
+    // Handle received, cancelled, or deleted orders
+    if (isset($_POST['received'])) {
+        $order_id = $_POST['order_id'];
+        // Update the status of the order to 'received'
+        $update_sql = "UPDATE orders SET status = 'received' WHERE order_id = ?";
+        $stmt = $conn->prepare($update_sql);
+        $stmt->bind_param("i", $order_id);
+        $stmt->execute();
+        echo "<script>alert('Order marked as Received');</script>";
+        echo "<script>window.location.href = 'order_history.php';</script>";
+        exit;
+    } elseif (isset($_POST['cancel'])) {
+        $order_id = $_POST['order_id'];
+        // Update the status of the order to 'cancelled'
+        $update_sql = "UPDATE orders SET status = 'cancelled' WHERE order_id = ?";
+        $stmt = $conn->prepare($update_sql);
+        $stmt->bind_param("i", $order_id);
+        $stmt->execute();
+        echo "<script>alert('Order cancelled');</script>";
+        echo "<script>window.location.href = 'order_history.php';</script>";
+        exit;
+    } elseif (isset($_POST['delete'])) {
+        $order_id = $_POST['order_id'];
+        // Delete the order
+        $delete_sql = "DELETE FROM orders WHERE order_id = ?";
+        $stmt = $conn->prepare($delete_sql);
+        $stmt->bind_param("i", $order_id);
+        $stmt->execute();
+        echo "<script>alert('Order deleted');</script>";
+        echo "<script>window.location.href = 'orders.php';</script>";
+        exit;
+    } elseif (isset($_POST['delete'])) {
+        $order_id = $_POST['order_id'];
+        // Delete the order
+        $delete_sql = "DELETE FROM orders WHERE order_id = ?";
+        $stmt = $conn->prepare($delete_sql);
+        $stmt->bind_param("i", $order_id);
+        $stmt->execute();
+        // Redirect to the same page to refresh the order history
+        echo "<script>alert('Order deleted');</script>";
+        echo "<script>window.location.href = 'orders.php';</script>";
+        exit;
+    }
+    ?>
+</body>
+</html>
