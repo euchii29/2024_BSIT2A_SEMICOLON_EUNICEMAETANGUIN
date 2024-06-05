@@ -3,6 +3,7 @@ $servername = "localhost";
 $username = "root"; 
 $password = "";
 $dbname = "gadgetgroove"; 
+$db_config= "";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 

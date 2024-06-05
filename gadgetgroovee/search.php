@@ -1,18 +1,34 @@
 <?php
-include 'config.php';
-// Create a new PDO instance
+include ('config.php');
+
 try {
     $pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     die("Could not connect to the database $dbname :" . $e->getMessage());
 }
+if (isset($_POST['submit'])) {
+  $search_query = $_POST['search_query'];
+  $sql = "SELECT product_id, product_name, product_img, description, price, status FROM products WHERE product_name LIKE '%$search_query%' OR price LIKE '%$search_query%' ORDER BY product_id";
+  $result = mysqli_query($conn, $sql);
+  if (mysqli_num_rows($result) > 0) {
+
+    while($row = mysqli_fetch_assoc($result)) { ?>
+
+       <div class="card">
+            <h2> <?php echo$row[product_name]; ?> </h2>
+            </div>
+        <?php }
+    }
+   else {
+    echo '<div class="alert alert-danger">No products found.</div>';
+  }
+}
 
 $query = strtolower($_GET['query'] ?? '');
 $description = strtolower($_GET['description'] ?? '');
 
-// SQL query to fetch products based on search query and description
-$sql = "SELECT * FROM products WHERE LOWER(product_name) LIKE :query";
+$sql = "SELECT * FROM products WHERE LOWER(product_name) LIKE :%$query%";
 $parameters = ['query' => "%$query%"];
 
 if (!empty($description)) {
@@ -22,8 +38,6 @@ if (!empty($description)) {
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($parameters);
-
-// Fetch filtered products
 $filteredProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -55,7 +69,7 @@ $filteredProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </ul> 
         <img src="img/Facebook_cover_-_1-removebg-preview.png" class="logo" alt="">
         
-        <form action="search.php" method="get" class="nav-search">
+        <form action="search.php" name="submit" id="submit" value="search" method="get" class="nav-search">
     <select name="category" class="select-search" id="category-select">
         <option value="all">All</option>
         <option value="all categories">All Categories</option>

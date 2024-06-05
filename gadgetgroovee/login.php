@@ -1,7 +1,19 @@
 <?php
+session_start(); // Start the session
 
-include 'db_connection.php';
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "gadgetgroove";
 
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Initialize the $error variable
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -9,12 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contactnumber = $_POST['contactnumber'];
     $password = $_POST['password'];
 
-
-    $conn = openConnection(); 
     $username = mysqli_real_escape_string($conn, $username);
     $contactnumber = mysqli_real_escape_string($conn, $contactnumber);
 
- 
     $query = $conn->prepare("SELECT * FROM users WHERE username=? AND contactnumber=?");
     $query->bind_param("ss", $username, $contactnumber);
     $query->execute();
@@ -25,13 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (password_verify($password, $user['password'])) {
             session_regenerate_id(true);
+            $_SESSION['user_id'] = $user['id']; // Set user_id in session
             $_SESSION['username'] = $username;
             $_SESSION['usertype'] = $user['user_type']; 
            
             if ($user['user_type'] === 'admin') {
                 header('Location: admin_home.php');
             } else {
-                header('Location: home2.php');
+                header('Location: home2.php'); 
             }
             exit();
         } else {
@@ -42,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $query->close();
-    closeConnection($conn);
+    $conn->close();
 }
 ?>
 

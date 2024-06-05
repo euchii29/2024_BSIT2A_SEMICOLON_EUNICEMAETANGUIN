@@ -1,11 +1,4 @@
-<?php
-session_start();
 
-if (!isset($_SESSION["username"]) || $_SESSION["usertype"] !== "user") {
-    header("Location: login.php");
-    exit();
-}
-?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -54,7 +47,7 @@ if (!isset($_SESSION["username"]) || $_SESSION["usertype"] !== "user") {
             <ul id="navbar">
                 <li><a class="active" href="home2.php"><i class="fa-solid fa-house"></i></a></li>
                 <li><a href="shop.php"><i class="fa-solid fa-shop"></i></a></li>
-                <li><a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a></li>
+                
                 <li><a href="order_tracking.php"><i class="fa-solid fa-truck-fast"></i></a></li>
                 <li><a href="order_history.php"><i class="fa-solid fa-clock-rotate-left"></i></a></li>
             </ul> 
@@ -63,7 +56,6 @@ if (!isset($_SESSION["username"]) || $_SESSION["usertype"] !== "user") {
 
 
     <section id="home2">
-        <h3>Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?>!</h3>
         <h4>Trade-in-offer</h4>
         <h2>Super value deals</h2>
         <h1>On all products</h1>

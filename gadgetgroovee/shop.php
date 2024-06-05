@@ -1,11 +1,3 @@
-<?php
-session_start();
-
-if (!isset($_SESSION["username"]) || $_SESSION["usertype"] !== "user") {
-    header("Location: login.php");
-    exit();
-}
-?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -59,7 +51,7 @@ if (!isset($_SESSION["username"]) || $_SESSION["usertype"] !== "user") {
             <ul id="navbar">
                 <li><a href="home2.php"><i class="fa-solid fa-house"></i></a></li>
                 <li><a class="active" href="shop.php"><i class="fa-solid fa-shop"></i></a></li>
-                <li><a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a></li>
+                <li><a href="order.php"><i class="fa-solid fa-cart-shopping"></i></a></li>
                 <li><a href="order_tracking.php"><i class="fa-solid fa-truck-fast"></i></a></li>
                 <li><a href="order_history.php"><i class="fa-solid fa-clock-rotate-left"></i></a></li>
             </ul>    
@@ -74,29 +66,28 @@ if (!isset($_SESSION["username"]) || $_SESSION["usertype"] !== "user") {
     <?php
 
 include 'config.php'; // Make sure you include your database connection
-
+session_start();
 if (isset($_POST['add'])){
-    if (isset($_SESSION['cart'])) {
-        $item_array_id = array_column($_SESSION['cart'], "product_id");
+    if (isset($_SESSION['orders'])) {
+        $item_array_id = array_column($_SESSION['orders'], "product_id");
 
         if (in_array($_POST['product_id'], $item_array_id)) {
-            echo "<script>alert('Product is already added in the cart..!')</script>";
             echo "<script>window.location = 'shop.php'</script>";
         } else {
-            $count = count($_SESSION['cart']);
+            $count = count($_SESSION['orders']);
             $item_array = array(
                 'product_id' => $_POST['product_id']
             );
 
-            $_SESSION['cart'][$count] = $item_array;
+            $_SESSION['orders'][$count] = $item_array;
         }
     } else {
         $item_array = array(
             'product_id' => $_POST['product_id']
         );
 
-        $_SESSION['cart'][0] = $item_array;
-        print_r($_SESSION['cart']);
+        $_SESSION['orders'][0] = $item_array;
+        print_r($_SESSION['orders']);
     }
 }
 ?>
@@ -131,7 +122,7 @@ if (isset($_POST['add'])){
                 <p>₱<?php echo htmlspecialchars($row['price']); ?></p>
                 <form action="shop.php" method="post">
                     <input type="hidden" name="product_id" value="<?php echo $row['product_id']; ?>">
-                    <button type="submit" class="btn btn-warning my-3" name="add">Add to Cart <i class="fas fa-shopping-cart"></i></button>
+                    
                 </form>
             </div>
             <?php

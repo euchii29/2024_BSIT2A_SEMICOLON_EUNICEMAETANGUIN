@@ -224,9 +224,12 @@ if(isset($_POST['add_product'])){
 								<td><?php echo htmlspecialchars($row['description']); ?></td>
 								<td>₱<?php echo htmlspecialchars($row['price']); ?></td>
 								<td>
-									<a href="admin_update.php?edit=<?php echo $row['product_id']; ?>" class="btn"> <i class="fas fa-edit"></i> Edit </a>
-									<a href="admin_page.php?toggle_status=<?php echo $row['product_id']; ?>&status=<?php echo $row['status']; ?>" class="btn"> 
-										<?php echo $row['status'] == 'active' ? '<i class="fas fa-toggle-on"></i> Deactivate' : '<i class="fas fa-toggle-off"></i> Activate'; ?> 
+									<a href="admin_update.php?edit=<?php echo $row['product_id']; ?>" class="btn"> 
+									<i class="fas fa-edit"></i> Edit </a>
+									<a href="admin_page.php?toggle_status=<?php echo $row['product_id']; 
+									?>&status=<?php echo $row['status']; ?>" class="btn"> 
+										<?php echo $row['status'] == 'active' ? '<i class="fas fa-toggle-on">
+										</i> Deactivate' : '<i class="fas fa-toggle-off"></i> Activate'; ?> 
 									</a>
 								</td>
 							</tr>

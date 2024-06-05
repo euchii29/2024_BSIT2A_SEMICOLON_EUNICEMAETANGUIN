@@ -889,8 +889,8 @@ body {
   margin: 5px 0;
 }
 .flash1 {
-  position: relative; /* Set container as relative */
-  width: 600px; /* Increased width to accommodate description */
+  position: relative; 
+  width: 600px; 
   margin: 10px;
   padding: 10px;
   background-color: #fff;

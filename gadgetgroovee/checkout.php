@@ -1,77 +1,128 @@
-<?php
-session_start();
-
-if(isset($_POST['checkout'])) {
-
-    $cartItems = $_SESSION['cart'] ?? [];
-
-    unset($_SESSION['cart']);
-    exit();
-}
-?>
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cart</title>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.css" />
-
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" >
+	<meta charset="utf-8">
+  	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Checkout</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
-<body class="bg-light">
+<body 
 
-        <div id="sidebar" class="sidebar">
-        <div class="logo">
-            <img src="img/Facebook_cover_-_1-removebg-preview.png" alt="GadgetGroove Logo" width="150px">
-        </div>
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><i class="fa-solid fa-bars"></i></a>
-        <a href="profile.php">Profile</a>
-        <a href="#">About Us</a>
-        <a href="#">Services</a>
-        <a href="#">Contact</a>
-        <a href="logout.php">Log Out</a>
+<?php
+include 'config.php';
+session_start();
+?>
+	<div class="container" style="margin-top: 30px; width: 90%;">
+	    <div style="clear:both">
+	    <h1 style="font-weight: bold;">Checkout</h1>
+	    <p>For: <?php echo $_SESSION['user_id']?> <?php echo $_SESSION['user_id']; ?></p><br>
+	    <div class="table-responsive">
+	        <table class="table table-bordered">
+	            <tr>
+	            	<th>Item Name</th>
+	        	    <th>Quantity</th>
+	    	        <th>Price</th>
+		            <th>Total/Quantity</th>
+	            </tr>
+	            <?php
+	            	include ('config.php');
+	            	
+            		$sql = "SELECT * FROM cart WHERE cart_id = ?";
+                    $stmt = mysqli_stmt_init($conn);
 
-    </div>
+                    if (!mysqli_stmt_prepare($stmt, $sql)) {
+                        header("location: checkout.php?error=sqlerror");
+                        exit();
+                    } else {
+                    mysqli_stmt_bind_param($stmt, "i", $_SESSION['cart_id']);
+                    mysqli_stmt_execute($stmt);
+                    $result = mysqli_stmt_get_result($stmt);
 
-    <section id="header1">
-        <ul id="navbar">
-            <li><a href="javascript:void(0)" class="openbtn" onclick="openNav()"><i class="fa-solid fa-bars"></i></a></li>
-        </ul> 
-        <img src="img/Facebook_cover_-_1-removebg-preview.png" class="logo" alt="">
-        <div class="nav-search">
-        <form action="search.php" method="get" class="nav-search">
-    <select name="category" class="select-search" id="category-select">
-        <option value="all">All</option>
-        <option value="all categories">All Categories</option>
-        <option value="uno gusto mo">uno gusto mo</option>
-        <option value="sale">Sale</option>
-    </select>
-    <input type="text" name="description" placeholder="Search Description" class="search-input" id="description-bar">
-    <button type="submit" class="search-icon" id="search-button">
-        <span class="fa-solid fa-magnifying-glass"></span>
-    </button>
-</form>
-        </div>
-        <div>
-            <ul id="navbar">
-                <li><a href="home2.php"><i class="fa-solid fa-house"></i></a></li>
-                <li><a href="shop.php"><i class="fa-solid fa-shop"></i></a></li>
-                <li><a class="active" href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a></li>
-                <li><a href="order_tracking.php"><i class="fa-solid fa-truck-fast"></i></a></li>
-            </ul> 
-        </div>
-    </section>
-    
-    <?php 
-    include_once 'order_history.php'; 
-    ?>
-        
-</body>
-</html>
+                    $total = 0;
+                    while ($row = mysqli_fetch_assoc($result)) {
+            	?>
+	            <tr>
+	                <td><?php echo $row["Item Name"] ; ?></td>
+	                <td><?php echo $row["Quantity"]; ?></td>	
+	                <td>₱ <?php echo $row["Price"]; ?></td>
+	                <td>₱ <?php echo $row["Total Quantity"]; ?></td>               
+	            </tr>
+	            <?php
+	            	$total += $row['quantity'];
+	            	$listNames[] = $row['Product_id']." (".$row['quantity'].")";;
 
+	            	$allproducts = implode(", ", $listNames);
+
+	            	$_SESSION['allproducts'] = $allproducts;
+					}
+				}
+				?>	 
+	            <tr>
+	                <td colspan="3" align="right" style="font-weight: bold;">Total</td>
+	                <td align="right">₱ <?php echo $total; ?></td>
+	            </tr>
+	        </table>
+	    </div>
+	</div>
+  </div>
+
+	<div style="display: flex; flex-direction: row; width: 90%; justify-content: center; margin:auto; padding:10px 10px;">
+	<div class="container" style="margin-top:15px; width:45%; ">
+	    <div style="clear:both">
+	    <h2 style="font-weight: bold;">Delivery Details</h2><br>
+	    <div class="table-responsive">
+	        <table class="table table-bordered">
+	            <tr>
+	            	<th width="30%">Name:</th>
+	        	    <td width="70%"><?php echo $_SESSION['user_id']." ".$_SESSION['user_id']; ?></td>
+	            </tr>
+	            <tr>
+	                <th width="30%">Address to be delivered: </th>
+	        	    <td width="70%">
+	        	    	<form method="POST" action="includes/cart.inc.php">
+	        	    		<input type="text" name="address" style="color:black;">
+	        	    		<input type="submit" name="address_btn" class="btn btn-primary">
+	        	    		<br><br>
+	        	    	</form>
+	        	    	<?php echo "Current Address: ".$_SESSION['user_id']; ?>
+	        	    </td>
+	            </tr>
+	            <tr>
+	                <th width="30%">Phone Number:</th>
+	        	    <td width="70%">+ <?php echo $_SESSION['user_id'];?></td>
+	            </tr>
+	            <tr>
+	                <th width="30%">Date of Purchase:</th>
+	        	    <td width="70%">
+	        	    	<?php 
+	        	    		$mydate=getdate(date("U"));
+							echo "$mydate[month] $mydate[mday], $mydate[year]";
+	        	    	?>
+	        	    </td>
+	            </tr>
+	        </table>
+	    </div>
+	</div>
+	</div>
+
+	<div class="container" style="margin-top:15px; width:45%;">
+    <div style="clear:both">
+        <h2 style="font-weight: bold;">Summary</h2><br>
+        <div class="table-responsive">
+            <form method="POST" action="includes/cart.inc.php" name="payment" id="payment">
+                <div>
+                    <label for="paymentM">Payment Method:</label>
+                    <select class="form-select" aria-label="Default select example" id="paymentM" name="paymentM">
+                        <option disabled selected>Select Option...</option>
+                        <option value="Cash on Delivery">Cash on Delivery</option>
+                        <option value="Online Payment">Online Payment</option>
+                     
+                    </select>
+                </div><br>
+
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Total Price :</th>
+                        <td>₱ <?php echo $total; ?></td>
